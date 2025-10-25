@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Email Generator — IONOS Customer Service</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7286/7286142.png">
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#0b1220;
+      --accent:#06b6d4;
+      --muted:#94a3b8;
+      --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg, #071024 0%, #071f2a 100%);
+      color: #e6eef6;
+      padding:24px;
+    }
+    .container{
+      width:100%;
+      max-width:1000px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:20px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    h1{margin:0 0 12px 0;font-size:20px;}
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-bottom:14px;
+      flex-wrap:wrap;
+    }
+    .tab{
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      border:1px solid rgba(255,255,255,0.03);
+      background:transparent;
+      color:var(--muted);
+    }
+    .tab.active{
+      background:linear-gradient(90deg,var(--accent), #0891b2);
+      color:#041423;
+      box-shadow: 0 6px 18px rgba(6,182,212,0.08);
+    }
+    .grid{
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr 440px;
+    }
+    @media (max-width:980px){ .grid{ grid-template-columns:1fr; } }
+    .card{
+      background:var(--card);
+      border-radius:10px;
+      padding:14px;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+    input[type="text"]{
+      width:100%;
+      padding:10px 12px;
+      background:var(--glass);
+      border:none;
+      border-radius:8px;
+      color: #e6eef6;
+      font-size:15px;
+      outline:2px solid transparent;
+      transition: outline-color .12s;
+    }
+    input[type="text"]:focus{ outline-color: rgba(6,182,212,0.18); }
+    .controls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+    button{
+      padding:10px 12px;
+      border-radius:8px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent), #0891b2);
+      color:#041423;
+      box-shadow: 0 6px 18px rgba(6,182,212,0.08);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .preview{
+      white-space:pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      font-size:14px;
+      line-height:1.5;
+      color:#dff7fb;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      padding:12px;
+      border-radius:8px;
+      min-height:300px;
+      overflow:auto;
+      border:1px dashed rgba(255,255,255,0.02);
+    }
+    .small{font-size:13px;color:var(--muted);}
+    .actions-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+    .copied{
+      background: rgba(34,197,94,0.12);
+      color: #a7f3d0;
+      padding:6px 8px;
+      border-radius:6px;
+      font-weight:600;
+      border:1px solid rgba(34,197,94,0.08);
+    }
+    footer{margin-top:12px;color:var(--muted);font-size:13px;}
+    .field-group{margin-top:12px;}
+    .bank-block{
+      background: rgba(255,255,255,0.01);
+      padding:10px;
+      border-radius:8px;
+      margin-top:8px;
+      font-size:14px;
+      color:var(--muted);
+      line-height:1.5;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-labelledby="title">
+    <h1 id="title">Email Generator — IONOS Customer Service</h1>
+
+    <div class="tabs" role="tablist" aria-label="Email templates">
+      <!-- reordered tabs: Meeting Link, Bank Payment, Invoice Verification -->
+      <button class="tab active" data-tab="tab3" role="tab" aria-selected="true">Videochat Link</button>
+      <button class="tab" data-tab="tab2" role="tab" aria-selected="false">Wire Transfer</button>
+      <button class="tab" data-tab="tab1" role="tab" aria-selected="false">Invoice Verification (Privacy Lock)</button>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Inputs area -->
+      <div class="card" id="inputsCard" aria-live="polite">
+        <!-- Tab 3 (Meeting Link) inputs — now listed first but panels may be any order -->
+        <div id="tab3" class="tab-panel">
+          <div>
+            <label for="meetingLink">Link</label>
+            <input id="meetingLink" type="text" placeholder="https://meet.example.com/abc123" autocomplete="off" />
+            <div class="small" style="margin-top:6px;">Paste the meeting link or URL here.</div>
+          </div>
+
+          <div class="controls" style="margin-top:12px;">
+            <button id="generate_tab3" class="btn-primary">Generate Preview</button>
+            <button id="copy_tab3" class="btn-ghost">Copy Email</button>
+            <button id="reset_tab3" class="btn-ghost">Reset</button>
+          </div>
+        </div>
+
+        <!-- Tab 2 inputs -->
+        <div id="tab2" class="tab-panel" style="display:none;">
+          <div>
+            <label for="customerId">Customer ID</label>
+            <input id="customerId" type="text" placeholder="e.g. CUST-123456" autocomplete="off" />
+          </div>
+
+          <div class="field-group">
+            <label for="amount2">Amount</label>
+            <input id="amount2" type="text" placeholder="e.g. $1,234.56" autocomplete="off"/>
+            <div class="small" style="margin-top:6px;">The text will be used as-is in the email.</div>
+          </div>
+
+          <div style="margin-top:12px;" class="small">Bank Details (static in template):</div>
+          <div class="bank-block">
+            Recipient: 1&1 IONOS Inc.<br>
+            Bank: CitiBank NA<br>
+            Account Number: 54348256<br>
+            ABA/Routing Number: 021000089<br>
+            SWIFT Code: CITIUS33<br>
+            Bank Address: 460 Park Ave, New York, NY 10022
+          </div>
+
+          <div class="controls" style="margin-top:12px;">
+            <button id="generate_tab2" class="btn-primary">Generate Preview</button>
+            <button id="copy_tab2" class="btn-ghost">Copy Email</button>
+            <button id="reset_tab2" class="btn-ghost">Reset</button>
+          </div>
+        </div>
+
+        <!-- Tab 1 inputs -->
+        <div id="tab1" class="tab-panel" style="display:none;">
+          <div>
+            <label for="invoice">Invoice No.</label>
+            <input id="invoice" type="text" placeholder="e.g. INV-2025-000123" autocomplete="off" />
+          </div>
+
+          <div class="field-group">
+            <label for="amount">Amount</label>
+            <input id="amount" type="text" placeholder="e.g. $1,234.56" autocomplete="off"/>
+            <div class="small" style="margin-top:6px;">You can type currency symbol — the text will be used as-is in the email.</div>
+          </div>
+
+          <div class="controls">
+            <button id="generate_tab1" class="btn-primary">Generate Preview</button>
+            <button id="copy_tab1" class="btn-ghost">Copy Email</button>
+            <button id="reset_tab1" class="btn-ghost">Reset</button>
+          </div>
+        </div>
+
+        <div class="actions-row" style="margin-top:10px;">
+          <div id="status" aria-live="polite" class="small"></div>
+        </div>
+
+        <footer>
+          Tip: Click <strong>Copy Email</strong> to copy the built message (from inputs) or use <strong>Copy Preview</strong> to copy any edits in the preview area.
+        </footer>
+      </div>
+
+      <!-- RIGHT: Preview area -->
+      <div class="card" aria-label="Preview">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="small">Email Preview (exact spacing shown)</div>
+          <div class="small">Editable — you can tweak before copying.</div>
+        </div>
+
+        <div id="preview" class="preview" contenteditable="true" spellcheck="false" aria-label="Email preview"></div>
+
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="copyPreview" class="btn-primary" style="flex:1">Copy Preview</button>
+          <button id="downloadTxt" class="btn-ghost" style="flex:1">Download .txt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Templates for all three tabs (preserve exact spacing / blank lines)
+    const template1 = `Dear Customer,
+
+As part of our verification process, I will be sending you the latest invoice linked to your account. Once you receive it, kindly read back to me the invoice number and the total amount stated on the invoice.
+
+Invoice No.: {{INVOICE}}
+Amount: {{AMOUNT}}
+
+This will help us confirm your account securely and proceed with your inquiry.
+
+Thank you for your cooperation.
+
+Best regards,
+IONOS Customer Service
+ 
+Contact | Facebook | X
+Email: support@ionos.com
+ 
+IONOS Inc.
+`;
+
+    const template2 = `Dear Customer,
+
+Thank you for reaching out. As discussed, you may settle your outstanding balance by completing an online bank transfer, wire transfer, or direct cash deposit using the details below:
+
+Bank Details
+   Recipient: 1&1 IONOS Inc.
+   Bank: CitiBank NA
+   Account Number: 54348256
+   ABA/Routing Number: 021000089
+   SWIFT Code: CITIUS33
+   Bank Address: 460 Park Ave, New York, NY 10022
+
+Payment Details
+   Customer ID: {{CUSTOMERID}}
+   Amount: {{AMOUNT}}
+
+Important Reminders
+  ✅ Please include your Customer ID and the email address linked to your account in the payment reference to ensure proper allocation.
+  ✅ Keep a copy of your payment receipt for your records.
+
+You may complete the payment by:
+   ● Initiating an online transfer through your bank using the details above,
+   ● Providing the details to your financial institution for a wire transfer, or
+   ● Visiting any CitiBank branch and making a direct deposit.
+
+Once the payment has been completed, kindly reply to this email with your payment receipt so we can confirm and allocate it to your account. Please allow 3–5 business days for processing.
+
+If you have any questions, please don’t hesitate to reach us via phone, email, or chat at ionos.com/contact.
+
+Best regards,
+IONOS Customer Service
+ 
+Contact | Facebook | X
+Email: support@ionos.com
+ 
+IONOS Inc.
+`;
+
+    const template3 = `Dear Customer,
+
+To join the meeting and begin screen sharing, simply click the link below or paste it into your browser.
+
+Link: {{LINK}}
+
+We look forward to speaking with you.
+
+Best regards,
+IONOS Customer Service
+ 
+Contact | Facebook | X
+Email: support@ionos.com
+ 
+IONOS Inc.
+`;
+
+    // Elements
+    const tabs = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.tab-panel');
+    const preview = document.getElementById('preview');
+    const status = document.getElementById('status');
+
+    // Tab1 elements (Invoice)
+    const invoiceInput = document.getElementById('invoice');
+    const amountInput = document.getElementById('amount');
+    const generateTab1 = document.getElementById('generate_tab1');
+    const copyTab1 = document.getElementById('copy_tab1');
+    const resetTab1 = document.getElementById('reset_tab1');
+
+    // Tab2 elements (Bank Payment)
+    const customerIdInput = document.getElementById('customerId');
+    const amount2Input = document.getElementById('amount2');
+    const generateTab2 = document.getElementById('generate_tab2');
+    const copyTab2 = document.getElementById('copy_tab2');
+    const resetTab2 = document.getElementById('reset_tab2');
+
+    // Tab3 elements (Meeting Link)
+    const meetingLinkInput = document.getElementById('meetingLink');
+    const generateTab3 = document.getElementById('generate_tab3');
+    const copyTab3 = document.getElementById('copy_tab3');
+    const resetTab3 = document.getElementById('reset_tab3');
+
+    const copyPreviewBtn = document.getElementById('copyPreview');
+    const downloadBtn = document.getElementById('downloadTxt');
+
+    // Track current active tab id ('tab1' | 'tab2' | 'tab3')
+    let activeTab = 'tab3'; // Meeting Link is default now
+
+    // Tab switching
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-tab');
+        if (target === activeTab) return;
+        // toggle active class on tabs
+        tabs.forEach(t => {
+          t.classList.toggle('active', t.getAttribute('data-tab') === target);
+          t.setAttribute('aria-selected', t.getAttribute('data-tab') === target ? 'true' : 'false');
+        });
+        // show/hide panels
+        panels.forEach(p => p.style.display = (p.id === target) ? '' : 'none');
+        activeTab = target;
+        status.textContent = '';
+        // Update preview for new active tab
+        if (activeTab === 'tab1') {
+          showPreview(buildEmailTextTab1(invoiceInput.value, amountInput.value));
+          invoiceInput.focus();
+        } else if (activeTab === 'tab2') {
+          showPreview(buildEmailTextTab2(customerIdInput.value, amount2Input.value));
+          customerIdInput.focus();
+        } else {
+          showPreview(buildEmailTextTab3(meetingLinkInput.value));
+          meetingLinkInput.focus();
+        }
+      });
+    });
+
+    // Builders
+    function buildEmailTextTab1(invoice, amount){
+      const inv = invoice?.trim() || '';
+      const amt = amount?.trim() || '';
+      return template1.replace('{{INVOICE}}', inv).replace('{{AMOUNT}}', amt);
+    }
+
+    function buildEmailTextTab2(customerId, amount){
+      const cid = customerId?.trim() || '';
+      const amt = amount?.trim() || '';
+      return template2.replace('{{CUSTOMERID}}', cid).replace('{{AMOUNT}}', amt);
+    }
+
+    function buildEmailTextTab3(link){
+      const l = link?.trim() || '';
+      return template3.replace('{{LINK}}', l);
+    }
+
+    // Show preview
+    function showPreview(text){
+      preview.textContent = text;
+    }
+
+    // Copy helper with fallback
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        status.textContent = 'Copied to clipboard ✓';
+        status.className = 'copied';
+        setTimeout(()=>{ status.textContent=''; status.className='small'; }, 2500);
+        return true;
+      }catch(e){
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position='fixed';
+        ta.style.left='-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try{
+          document.execCommand('copy');
+          status.textContent = 'Copied to clipboard ✓';
+          status.className = 'copied';
+          setTimeout(()=>{ status.textContent=''; status.className='small'; }, 2500);
+          return true;
+        }catch(err){
+          status.textContent = 'Copy failed — select and copy manually';
+          status.className = 'small';
+          return false;
+        }finally{
+          document.body.removeChild(ta);
+        }
+      }
+    }
+
+    // Tab1 actions (Invoice)
+    generateTab1.addEventListener('click', ()=>{
+      const txt = buildEmailTextTab1(invoiceInput.value, amountInput.value);
+      showPreview(txt);
+      status.textContent = 'Preview updated';
+      status.className = 'small';
+    });
+
+    copyTab1.addEventListener('click', async ()=>{
+      const txt = buildEmailTextTab1(invoiceInput.value, amountInput.value);
+      await copyToClipboard(txt);
+    });
+
+    resetTab1.addEventListener('click', ()=>{
+      invoiceInput.value = '';
+      amountInput.value = '';
+      if (activeTab === 'tab1') preview.textContent = '';
+      status.textContent = 'Inputs cleared';
+      status.className = 'small';
+      invoiceInput.focus();
+    });
+
+    // Tab2 actions (Bank Payment)
+    generateTab2.addEventListener('click', ()=>{
+      const txt = buildEmailTextTab2(customerIdInput.value, amount2Input.value);
+      showPreview(txt);
+      status.textContent = 'Preview updated';
+      status.className = 'small';
+    });
+
+    copyTab2.addEventListener('click', async ()=>{
+      const txt = buildEmailTextTab2(customerIdInput.value, amount2Input.value);
+      await copyToClipboard(txt);
+    });
+
+    resetTab2.addEventListener('click', ()=>{
+      customerIdInput.value = '';
+      amount2Input.value = '';
+      if (activeTab === 'tab2') preview.textContent = '';
+      status.textContent = 'Inputs cleared';
+      status.className = 'small';
+      customerIdInput.focus();
+    });
+
+    // Tab3 actions (Meeting Link)
+    generateTab3.addEventListener('click', ()=>{
+      const txt = buildEmailTextTab3(meetingLinkInput.value);
+      showPreview(txt);
+      status.textContent = 'Preview updated';
+      status.className = 'small';
+    });
+
+    copyTab3.addEventListener('click', async ()=>{
+      const txt = buildEmailTextTab3(meetingLinkInput.value);
+      await copyToClipboard(txt);
+    });
+
+    resetTab3.addEventListener('click', ()=>{
+      meetingLinkInput.value = '';
+      if (activeTab === 'tab3') preview.textContent = '';
+      status.textContent = 'Inputs cleared';
+      status.className = 'small';
+      meetingLinkInput.focus();
+    });
+
+    // Copy preview (copies whatever text is currently visible in preview)
+    copyPreviewBtn.addEventListener('click', async ()=>{
+      const txt = preview.textContent;
+      if(!txt || !txt.trim()){
+        status.textContent = 'Preview is empty — generate first';
+        status.className = 'small';
+        return;
+      }
+      await copyToClipboard(txt);
+    });
+
+    // Download .txt
+    downloadBtn.addEventListener('click', ()=>{
+      let txt = preview.textContent;
+      if(!txt || !txt.trim()){
+        if(activeTab === 'tab1') txt = buildEmailTextTab1(invoiceInput.value, amountInput.value);
+        else if(activeTab === 'tab2') txt = buildEmailTextTab2(customerIdInput.value, amount2Input.value);
+        else txt = buildEmailTextTab3(meetingLinkInput.value);
+      }
+      const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (activeTab === 'tab1') ? 'invoice-email.txt' : (activeTab === 'tab2') ? 'payment-email.txt' : 'meeting-email.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      status.textContent = 'Downloaded file';
+      status.className = 'small';
+      setTimeout(()=>{ status.textContent=''; }, 2300);
+    });
+
+    // Initialize with meeting link template (tab3) and show that preview
+    window.addEventListener('load', ()=>{
+      // ensure correct panel visibility on load
+      panels.forEach(p => p.style.display = (p.id === activeTab) ? '' : 'none');
+      // set tab active classes correctly
+      tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-tab') === activeTab));
+      tabs.forEach(t => t.setAttribute('aria-selected', t.getAttribute('data-tab') === activeTab ? 'true' : 'false'));
+      showPreview(buildEmailTextTab3('', ''));
+      meetingLinkInput.focus();
+    });
+
+    // Keyboard shortcuts / Enter behavior
+    amountInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ generateTab1.click(); }});
+    invoiceInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ amountInput.focus(); e.preventDefault(); }});
+    amount2Input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ generateTab2.click(); }});
+    customerIdInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ amount2Input.focus(); e.preventDefault(); }});
+    meetingLinkInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ generateTab3.click(); }});
+  </script>
+</body>
+</html>

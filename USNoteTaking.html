@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Taking - &copy; 2025 Nuelle</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/889/889648.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 14px;            
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-mode {
+            background-color: #0f0f0f;
+            color: white;                        
+        }
+        .dark-mode .time-container {
+            background-color: #333;
+        }
+        .dark-mode .footer-container {
+            background-color: #333;
+        }
+		.dark-mode .toggle-container button {
+            background-color: #333;
+        }
+		.dark-mode .menu-btn button {
+            background-color: #333;
+        }
+		.toggle-container button {
+            background-color: black;
+            color: white;
+            margin-bottom: 1px;
+            margin-top: 1px;
+            padding: 0.1em;
+            font-size: 9px; 
+            min-width: 50px; 
+            min-height: 0px;
+            margin-right: 10px;
+			margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;			
+        }
+		
+		
+		
+		
+        .time-container {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: Black;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .footer-container {
+            text-align: center;
+            font-size: 0.7em;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: Black;
+            color: white;
+            margin-top: 20px;
+        }        
+        .button-container {
+		    text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }		
+		.button-container {
+			display: none; /* Hide the buttons initially */
+			margin-top: 20px;
+		}		
+        .button-container button {
+            background-color: #007BFF;
+            margin: 2px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 11px; 
+            min-width: 90px; 
+            min-height: 0px;
+        }
+        .button-container button:hover {
+            opacity: 0.8;
+        }
+		.button-group button:hover {
+            opacity: 0.8;
+        }
+        .menuback-container button:hover {
+            opacity: 0.8;
+        }		
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+            display: none;
+        }
+        .form-container.active {
+            display: block;
+        }
+        .form-container label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .form-container textarea {
+            width: 96%;
+            padding: 8px;
+            margin-bottom: 1px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            height: 18px;
+            resize: vertical;
+            font-family: 'Helvetica', sans-serif;			
+        }
+        .form-container button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .select-option {
+            height: 18px;
+            margin-top: 8px;
+            text-align: center;
+            width: 100px;
+            font-size: 9px; 
+        }
+        .back-btn button {
+            background-color: #f44336;
+            color: white;
+            margin-bottom: 1px;
+            margin-top: 1px;
+            padding: 0.1em;
+            font-size: 12px; 
+            min-width: 50px; 
+            min-height: 0px; 
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            margin: 1px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 12px; 
+            min-width: 80px; 
+            min-height: 0px;
+        }
+        .save-as-btn {
+            background-color: #007BFF;
+            margin: 1px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 12px; 
+            min-width: 80px; 
+            min-height: 0px;
+        }
+        .reset-btn {
+            background-color: #f44336;
+            margin: 1px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 12px; 
+            min-width: 80px; 
+            min-height: 0px;
+        }
+        .undo-btn {
+            background-color: #f7be02;
+            margin: 1px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 12px; 
+            min-width: 80px; 
+            min-height: 0px;
+        }		
+        .sync-btn {
+            background-color: #84419D;
+            margin: 1px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            padding: 0.8em;
+            font-size: 12px; 
+            min-width: 80px; 
+            min-height: 0px;
+        }
+        .button-group button { 
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 4px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .back-to-top {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          padding: 5px;
+          background: none;
+          color: red;
+          font-size: 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          display: none;
+        }
+        .back-to-top:hover::after {
+          content: 'Back to Top'; 
+          font-size: 8px;
+		}
+		
+		
+		
+		
+        select, input {
+            padding: 10px;
+            margin: 10px 0;
+            width: calc(100% - 20px);
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .result {
+            margin-top: 20px;
+			font-weight: bold;
+			margin-bottom: 20px;
+			color: green;
+        }		
+		.menu-btn button {
+            background-color: black;
+            color: white;
+            margin-bottom: 1px;
+            margin-top: 1px;
+            padding: 0.1em;
+            font-size: 12px; 
+            min-width: 50px; 
+            min-height: 0px; 
+        }
+		.menuback-container {
+            display: flex;
+            flex-wrap: wrap;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+		}
+		
+				.dateful-timezonecontainer {
+			margin-top: 20px;
+			position: relative;
+			width: 100%;
+			max-width: 900px;
+			height: 360px; /* reduced height by 50px */
+			box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+			border-radius: 12px;
+			overflow: hidden;
+			background-color: #1e1e1e;
+		}
+
+		.dateful-timezonecontainer iframe {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 720px; /* keep full height to ensure it covers */
+			border: none;
+			transform: translateY(-170px); /* already shifted to hide header/footer */
+			background-color: #121212;
+		}	
+    </style>
+</head>
+<body>
+
+    <div class="time-container" id="time"></div>
+
+    <div class="button-container">
+		<button onclick="showForm('sasApproachForm'); hideButtons()">SAS Approach</button>
+        <button onclick="showForm('sasMonitoringForm'); hideButtons()">SAS Monitoring</button>
+        <button onclick="showForm('escalationForm'); hideButtons()">Escalation Form</button>
+        <button onclick="showEditFileForm(); hideButtons()">Edit & Save File</button>
+		<button onclick="showForm('secuForm'); hideButtons()">Security Form</button>
+		<button onclick="showForm('timeConv'); hideButtons()">Time Converter</button>
+    </div>
+	
+    <div class="form-container active" id="customerSupportForm">
+	
+		<div class="menuback-container">
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+	
+        <h2>Customer Support Details</h2>
+        <form id="supportForm">
+            <label for="customerID">Customer ID:</label>
+            <textarea id="customerID" name="customerID" style="height: 18px;"></textarea>
+
+            <label for="name">Who Contacted Us:</label>
+            <textarea id="name" name="name" style="height: 18px;"></textarea>
+
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="verificationInput">Verified?:</label>
+                    <input type="text" 
+                           id="verificationInput" 
+                           list="verificationOptions" 
+                           class="select-option"
+                           oninput="populateVerification()" 
+                           placeholder="-- Options --">
+                    <datalist id="verificationOptions">
+                        <option value="Yes, Email on File">
+                        <option value="Yes, IVR">
+                        <option value="Yes, Phone Pin">
+                        <option value="Yes, Temporary Phone Pin">
+                        <option value="Yes, 2 Data Point">
+						<option value="Yes, by the Previous Agent">
+                        <option value="Not Verified">
+                    </datalist>
+                </div>
+                <textarea id="verification" name="verification" style="height: 18px;"></textarea>
+            </div>
+
+
+            <label for="concern">Concern:</label>
+            <textarea id="concern" name="concern" style="height: 160px;"></textarea>
+
+            <label for="supoffered">Support Offered:</label>
+            <textarea id="supoffered" name="supoffered" style="height: 160px;"></textarea>
+
+            <label for="IntID">Call/Interaction ID:</label>
+            <textarea id="IntID" name="IntID" style="height: 18px;"></textarea>
+
+            <div class="button-group">
+                <button type="button" class="copy-btn" onclick="copyDetails('customerSupportForm')">Copy</button>
+                <button type="button" class="save-as-btn" onclick="saveAsText('customerSupportForm')">Save</button>
+                <button type="button" class="reset-btn" onclick="resetForm('customerSupportForm')">Reset</button>
+				<button type="button" class="undo-btn" onclick="undoReset('customerSupportForm')">Undo</button>
+                <button type="button" class="sync-btn" onclick="populateAcrossForms('customerSupportForm')">Sync</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-container" id="sasApproachForm">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+	
+        <h2>Sales After Support</h2>
+        <form>
+
+            <label for="customerID">Customer ID:</label>
+            <textarea id="customerID" name="customerID" style="height: 18px;"></textarea>
+
+            <label for="name">Who Contacted Us:</label>
+            <textarea id="name" name="name" style="height: 18px;"></textarea>
+
+            <label for="productOffered">Product Offered:</label>
+            <textarea id="productOffered" name="productOffered" style="height: 160px;"></textarea>
+
+            <label for="reason">Reason:</label>
+            <textarea id="reason" name="reason" style="height: 18px;"></textarea>
+			
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="medCodeInput">Medium Code:</label>
+                    <!-- Changed to input field linked to datalist -->
+                    <input type="text" 
+                           id="medCodeInput" 
+                           list="medCodeOptions" 
+                           class="select-option"
+                           oninput="populateMediumCode()" 
+                           placeholder="-- Options --">
+                    <datalist id="medCodeOptions">
+                        <option value="SAS Inbound">
+                        <option value="SAS Outbound">
+                        <option value="SAS Mail">
+                        <option value="SAS-CC Service">
+                        <option value="Retention Inbound">
+                        <option value="Retention Outbound">
+                        <option value="Telesales Inbound Chat">
+                        <option value="Telesales Inbound Mail">
+                        <option value="Telesales Inbound Phone">
+                    </datalist>
+                </div>
+                <textarea id="medCODE" name="medCODE" style="height: 18px;"></textarea>
+            </div>
+
+            <label for="orderID">Order ID:</label>
+            <textarea id="orderID" name="orderID" style="height: 18px;"></textarea>
+
+            <label for="callQueue">Call Queue:</label>
+            <textarea id="callQueue" name="callQueue" style="height: 18px;"></textarea>
+			
+            <label for="caseID">Case ID:</label>
+            <textarea id="caseID" name="caseID" style="height: 18px;"></textarea>
+
+            <label for="IntID">Call/Interaction ID:</label>
+            <textarea id="IntID" name="IntID" style="height: 18px;"></textarea>
+
+            <div class="button-group">
+                <button type="button" class="copy-btn" onclick="copyDetails('sasApproachForm')">Copy</button>
+                <button type="button" class="save-as-btn" onclick="saveAsText('sasApproachForm')">Save</button>
+                <button type="button" class="reset-btn" onclick="resetForm('sasApproachForm')">Reset</button>
+				<button type="button" class="undo-btn" onclick="undoReset('sasApproachForm')">Undo</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-container" id="sasMonitoringForm">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+		
+        <h2>SAS Monitoring</h2>
+        <form>
+
+            <label for="customerID">Customer ID:</label>
+            <textarea id="customerID" name="customerID" style="height: 18px;"></textarea>
+
+            <label for="name">Who Contacted Us:</label>
+            <textarea id="name" name="name" style="height: 18px;"></textarea>
+
+            <label for="IntID">Call/Interaction ID:</label>
+            <textarea id="IntID" name="IntID" style="height: 18px;"></textarea>
+
+            <label for="product">Product:</label>
+            <textarea id="product" name="product" style="height: 160px;"></textarea>
+
+            <label for="note">Note:</label>
+            <textarea id="note" name="note" style="height: 50px;">Hi team, kindly let me know if this customer contacts us.</textarea>
+
+            <div class="button-group">
+                <button type="button" class="copy-btn" onclick="copyDetails('sasMonitoringForm')">Copy</button>
+                <button type="button" class="save-as-btn" onclick="saveAsText('sasMonitoringForm')">Save</button>
+                <button type="button" class="reset-btn" onclick="resetForm('sasMonitoringForm')">Reset</button>
+				<button type="button" class="undo-btn" onclick="undoReset('sasMonitoringForm')">Undo</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-container" id="escalationForm">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+		
+        <h2>Escalation</h2>
+        <form>
+
+            <label for="customerID">Customer ID:</label>
+            <textarea id="customerID" name="customerID" style="height: 18px;"></textarea>
+
+            <label for="name">Who Contacted Us:</label>
+            <textarea id="name" name="name" style="height: 18px;"></textarea>
+
+            <label for="issueDesc">Describe the issue:</label>
+            <textarea id="issueDesc" name="issueDesc" style="height: 160px;"></textarea>
+
+            <label for="reasonEscalate">Reason for escalating:</label>
+            <textarea id="reasonEscalate" name="reasonEscalate" style="height: 160px;"></textarea>
+
+            <label for="IntID">Call/Interaction ID:</label>
+            <textarea id="IntID" name="IntID" style="height: 18px;"></textarea>
+
+            <div class="button-group">
+                <button type="button" class="copy-btn" onclick="copyDetails('escalationForm')">Copy</button>
+                <button type="button" class="save-as-btn" onclick="saveAsText('escalationForm')">Save</button>
+                <button type="button" class="reset-btn" onclick="resetForm('escalationForm')">Reset</button>
+				<button type="button" class="undo-btn" onclick="undoReset('escalationForm')">Undo</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="form-container" id="editFileForm">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+		
+        <h2>Edit and Save File</h2>
+        <input type="file" id="fileInput" accept=".txt" onchange="loadFileContent()">
+        <textarea id="fileContent" style="height: 500px; margin-top: 10px;"></textarea>
+        <div style="margin-top: 1px; display: flex; align-items: center;">
+        <label for="fileNameInput" style="margin-right: 10px;">File Name:</label>
+        <input type="text" id="fileNameInput" placeholder="Enter new file name (e.g., datesaved_name_formtitle.txt)" style="flex: 1;">
+        </div>
+
+        <div class="button-group">
+            <button type="button" class="copy-btn" onclick="copyFileContent()">Copy</button>
+            <button type="button" class="save-as-btn" onclick="saveAsNew()">Save As New</button>
+			<button type="button" class="save-as-btn" onclick="saveToFile()">Save To File</button>
+            <button type="button" class="reset-btn" onclick="resetEditFileForm()">Reset</button>
+        </div>
+    </div>
+
+    <div class="form-container" id="secuForm">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+		
+        <h2>Security Concern</h2>
+        <form>
+
+            <label for="customerID">Customer ID:</label>
+            <textarea id="customerID" name="customerID" style="height: 18px;"></textarea>
+
+            <label for="name">Who Contacted Us:</label>
+            <textarea id="name" name="name" style="height: 18px;"></textarea>
+
+            <label for="flags">Attributes:</label>
+            <textarea id="flags" name="IntID" style="height: 50px;"></textarea>
+
+            <label for="ques">Questions:</label>
+            <textarea id="ques" name="ques" style="height: 100px;">Please check and advise. Thank you.</textarea>
+
+            <div class="button-group">
+                <button type="button" class="copy-btn" onclick="copyDetailsSECURITY('secuForm')">Copy</button>
+                <button type="button" class="save-as-btn" onclick="saveAsText('secuForm')">Save</button>
+                <button type="button" class="reset-btn" onclick="resetForm('secuForm')">Reset</button>
+				<button type="button" class="undo-btn" onclick="undoReset('secuForm')">Undo</button>
+            </div>
+        </form>
+    </div>
+	
+	<div class="form-container" id="timeConv">
+	
+		<div class="menuback-container">
+			<div class="back-btn">
+				<button onclick="goBack()">↩</button>
+			</div>
+			<div class="menu-btn">
+				<button onclick="toggleButtons()">☰</button>
+			</div>
+		</div>
+	
+		<div class="dateful-timezonecontainer">
+		  <iframe 
+			src="https://dateful.com/time-zone-converter" 
+			loading="lazy" 
+			allowfullscreen 
+			title="Dateful Time Zone Converter">
+		  </iframe>
+		</div>
+	</div>
+
+    <button class="back-to-top" onclick="goToTop()">↑</button>  
+
+	<div class="footer-container" id="footer">&copy; 2025 Nuelle - Note Taking
+	<div class="toggle-container">
+        <button onclick="toggleDarkMode()">Dark Mode</button>
+    </div>	
+	</div>
+	
+	
+
+    <script>
+        function updateTime() {
+            const timeContainer = document.getElementById("time");
+            const options = {
+                timeZone: 'America/New_York',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            };
+            const currentTime = new Date().toLocaleString('en-US', options);
+            timeContainer.textContent = `United States Realtime: ${currentTime}`;
+        }
+		
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();		
+
+        function showForm(formId) {
+            document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+            document.getElementById(formId).classList.add('active');
+        }
+
+        function goBack() {
+            document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+            document.getElementById('customerSupportForm').classList.add('active');
+        }
+
+        function resetEditFileForm() {
+            // Clear the file input
+            fileInput.value = "";
+            // Clear the file content textarea
+            fileContent.value = "";
+            // Clear the filename input
+            fileNameInput.value = "";
+            
+            // Indicate reset action
+            const resetButton = document.querySelector(`#editFileForm .reset-btn`);
+            resetButton.style.backgroundColor = "grey";
+            setTimeout(() => {
+                resetButton.style.backgroundColor = "#f44336";
+            }, 1000);
+        }
+				
+		let formBackup = {}; // Store form data before reset
+
+		function backupFormData(formId) {
+			formBackup[formId] = {};
+			document.querySelectorAll(`#${formId} textarea, #${formId} input`).forEach(field => {
+				formBackup[formId][field.id] = field.value;
+			});
+		}
+
+		function resetForm(formId) {
+			backupFormData(formId); // Save form data before reset
+			
+			const resetButton = document.querySelector(`#${formId} .reset-btn`);
+			resetButton.style.backgroundColor = "grey";
+			setTimeout(() => {
+				resetButton.style.backgroundColor = "#f44336";
+			}, 1000);
+
+			document.querySelectorAll(`#${formId} textarea, #${formId} input`).forEach(field => {
+				if (field.id !== "ques") { 
+					field.value = ""; // Clear all except "ques"
+				}
+			});
+	
+			// Reset specific inputs independently based on formId
+			if (formId === 'customerSupportForm') {
+				const verificationInput = document.getElementById('verificationInput');
+				if (verificationInput) verificationInput.value = "";  // Reset verificationInput
+				const verification = document.getElementById('verification');
+				if (verification) verification.value = "";  // Clear corresponding textarea for verification
+			}
+			else if (formId === 'sasApproachForm') {
+				const medCodeInput = document.getElementById('medCodeInput');
+				if (medCodeInput) medCodeInput.value = "";  // Reset medCodeInput
+				const medCODE = document.getElementById('medCODE');
+				if (medCODE) medCODE.value = "";  // Clear corresponding textarea for medCode
+			}	
+		}
+
+			function undoReset(formId) {
+				if (formBackup[formId]) {
+					document.querySelectorAll(`#${formId} textarea, #${formId} input`).forEach(field => {
+						if (formBackup[formId][field.id] !== undefined) {
+							field.value = formBackup[formId][field.id];
+						}
+					});
+			const undoButton = document.querySelector(`#${formId} .undo-btn`);
+			undoButton.style.backgroundColor = "grey";
+			setTimeout(() => {
+				undoButton.style.backgroundColor = "#f7be02";
+			}, 1000);					
+				}
+			}
+
+        function copyFileContent() {
+            // Get the textarea element
+            var textArea = document.getElementById("fileContent");
+            
+            // Select the content of the textarea
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // For mobile devices
+            
+            // Copy the selected content to the clipboard
+            document.execCommand("copy");
+
+            const copyButton = document.querySelector(`#editFileForm .copy-btn`);
+            copyButton.style.backgroundColor = "grey";
+            setTimeout(() => {
+                copyButton.style.backgroundColor = "#4CAF50";
+            }, 1000);
+        }
+
+        function copyDetails(formId) {
+            let details = "";
+            const formTitle = document.querySelector(`#${formId} h2`).innerText;
+            details += `*** ${formTitle} ***\n\n`; // Add two newline characters for spacing
+            const fields = document.querySelectorAll(`#${formId} textarea`);
+            fields.forEach(field => {
+                const labelText = field.previousElementSibling.innerText;
+                const value = field.value.trim() || "Not Provided"; // Use "Not Provided" if the value is empty
+                details += `• ${labelText}\n${value}\n\n`; // Add an extra newline for spacing
+            });
+            navigator.clipboard.writeText(details);
+            const copyButton = document.querySelector(`#${formId} .copy-btn`);
+            copyButton.style.backgroundColor = "grey";
+            setTimeout(() => {
+                copyButton.style.backgroundColor = "#4CAF50";
+            }, 1000);
+        }
+
+		function copyDetailsSECURITY(formId) {
+			let details = "";
+			const fields = document.querySelectorAll(`#${formId} textarea`);
+			
+			fields.forEach(field => {
+				const value = field.value.trim() || ""; // Use "Not Provided" if the value is empty
+				details += `• ${value}\n\n`; // Add an extra newline for spacing
+			});
+
+			navigator.clipboard.writeText(details);
+			
+			const copyButton = document.querySelector(`#${formId} .copy-btn`);
+			copyButton.style.backgroundColor = "grey";
+			
+			setTimeout(() => {
+				copyButton.style.backgroundColor = "#4CAF50";
+			}, 1000);
+		}
+
+        function saveAsText(formId) {
+            let details = "";
+            const formTitle = document.querySelector(`#${formId} h2`).innerText;
+
+            // Get the current date in MM-DD-YY format
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1; // Months are 0-indexed
+            const day = currentDate.getDate();
+            const year = currentDate.getFullYear().toString().slice(-2);  // Last 2 digits of year
+            const formattedDate = `${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}-${year}`;
+
+            // Construct file name: Date saved, then Who contacted us, then form title
+            const whoContacted = document.querySelector(`#${formId} #name`).value.trim() || "Unknown_Contact";
+            const sanitizedWhoContacted = whoContacted.replace(/[<>:"/\\|?*]/g, '_');  // Sanitize special characters for filenames
+            const sanitizedTitle = formTitle.replace(/\s+/g, '_');  // Sanitize spaces in form title
+
+            const fileName = `${formattedDate}_${sanitizedWhoContacted}_${sanitizedTitle}.txt`;
+
+            // Add details to be saved into the file
+            details += `Date Saved: ${currentDate.toLocaleString()}\n\n`;  // Date and Time when the file is saved
+            details += `*** ${formTitle} ***\n\n`;
+
+            // Copy the same content as in the copyDetails function
+            const fields = document.querySelectorAll(`#${formId} textarea`);
+            fields.forEach(field => {
+                const label = field.previousElementSibling ? field.previousElementSibling.innerText.trim() : "Unknown Field";
+                const value = field.value.trim() || "Not Provided";
+
+                // Ensure we don't append an extra colon if the label already has one
+                const formattedLabel = label.endsWith(':') ? label : label + ':';
+                details += `• ${formattedLabel}\n${value}\n\n`;  // Add formatted label, value, and an extra line
+            });
+
+            // Create and download the .txt file
+            const blob = new Blob([details], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+
+            // Optional: Change the button color to indicate saving has occurred
+            const saveButton = document.querySelector(`#${formId} .save-as-btn`);
+            saveButton.style.backgroundColor = "grey";
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        function showEditFileForm() {
+            document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+            document.getElementById('editFileForm').classList.add('active');
+        }
+
+            const fileInput = document.getElementById('fileInput');
+            const fileContent = document.getElementById('fileContent');
+            const fileNameInput = document.getElementById('fileNameInput');
+
+        function loadFileContent() {
+            const file = fileInput.files[0];
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    fileContent.value = e.target.result; // Load file content into textarea
+                    fileNameInput.value = file.name;    // Set filename input to file name
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function saveAsNew() {
+            const text = fileContent.value;
+            const fileName = fileNameInput.value || 'untitled.txt';
+
+            const blob = new Blob([text], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+
+            // Indicate saving has occurred
+            const saveButton = document.querySelector(`#editFileForm .save-as-btn`);
+            saveButton.style.backgroundColor = "grey";
+            setTimeout(() => {
+                saveButton.style.backgroundColor = "#007BFF";
+            }, 1000);
+        }
+		
+        function populateVerification() {
+            const inputField = document.getElementById('verificationInput');
+            const textarea = document.getElementById('verification');
+            
+            // Get the current value of the input field
+            const enteredValue = inputField.value;
+
+            // Update the textarea with the selected or entered value
+            textarea.value = enteredValue;
+        }
+
+        function populateMediumCode() {
+            const inputField = document.getElementById('medCodeInput');
+            const textarea = document.getElementById('medCODE');
+
+            // Get the current value of the input field
+            const enteredValue = inputField.value;
+
+            // Update the textarea with the selected or entered value
+            textarea.value = enteredValue;
+        }
+
+        function populateAcrossForms(formId) {
+            const activeForm = document.querySelector(`#${formId}`);
+            const textareas = activeForm.querySelectorAll('textarea');
+            
+            textareas.forEach((textarea) => {
+                const name = textarea.getAttribute('name');
+                if (name) {
+                    const valueToPopulate = textarea.value;
+                    document.querySelectorAll(`textarea[name="${name}"]`).forEach((field) => {
+                        field.value = valueToPopulate; // Populate the value across all matching textareas
+                    });
+                }
+            });
+
+        // Optional: Visual indication of success
+            const populateButton = document.querySelector(`#${formId} .sync-btn`);
+            populateButton.style.backgroundColor = "grey";
+            setTimeout(() => {
+                populateButton.style.backgroundColor = "#84419D";
+            }, 1000);
+        }
+
+            const backToTopBtn = document.querySelector('.back-to-top');
+
+            // Show button when the user scrolls down
+            window.onscroll = function () {
+              if (document.documentElement.scrollTop > 100) {
+                backToTopBtn.style.display = 'block'; // Show button
+              } else {
+                backToTopBtn.style.display = 'none'; // Hide button
+              }
+            };
+
+        // Scroll back to the top when the button is clicked
+        function goToTop() {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+				
+		async function saveToFile() {
+			try {
+				// Prompt the user to select a `.txt` file to overwrite
+				const [fileHandle] = await window.showOpenFilePicker({
+					types: [
+						{
+							description: "Text Files",
+							accept: { "text/plain": [".txt"] },
+						},
+					],
+					multiple: false,
+				});
+
+				// Confirm before overwriting
+				if (!confirm(`Do you want to overwrite the file: ${fileHandle.name}?`)) {
+					return; // Exit if the user cancels
+				}
+
+				// Get the text content from the input box
+				const text = document.getElementById("fileContent").value;
+
+				// Open the file for writing
+				const writable = await fileHandle.createWritable();
+				await writable.write(text);
+				await writable.close();
+
+				// Provide feedback to the user
+				alert(`File "${fileHandle.name}" has been updated successfully!`);
+
+				// Change button color to indicate success
+				const saveButton = document.querySelector(`#editFileForm .save-as-btn`);
+				saveButton.style.backgroundColor = "grey";
+				setTimeout(() => {
+					saveButton.style.backgroundColor = "#007BFF";
+				}, 1000);
+			} catch (err) {
+				console.error("Error saving file:", err);
+				alert("An error occurred while saving the file.");
+			}
+		}
+		
+		
+		if (!window.showDirectoryPicker) {
+			alert("Your browser does not support the File System Access API. Please use a Chromium-based browser.");
+		}
+
+		
+		
+		
+		
+		
+		
+		
+		
+		function convertTime() {
+            const sourceTime = document.getElementById("source-time").value;
+            const sourceZone = document.getElementById("source-zone").value;
+            const targetZone = document.getElementById("target-zone").value;
+
+            const [hours, minutes] = sourceTime.split(":").map(Number);
+            const sourceDate = new Date();
+            sourceDate.setHours(hours, minutes, 0, 0);
+
+            const sourceOffset = parseTimeZoneOffset(sourceZone);
+            sourceDate.setMinutes(sourceDate.getMinutes() - sourceOffset);
+
+            const targetOffset = parseTimeZoneOffset(targetZone);
+            const targetDate = new Date(sourceDate.getTime() + targetOffset * 60000);
+
+            const targetTimeFormatted = targetDate.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            const dayDifference = targetDate.getDate() - sourceDate.getDate();
+            let dayIndicator = "same day";
+
+            if (dayDifference === -1) {
+                dayIndicator = "previous day";
+            } else if (dayDifference === 1) {
+                dayIndicator = "next day";
+            }
+
+            document.getElementById("result").innerText = `Time in (${targetZone}) - ${targetTimeFormatted} (${dayIndicator})`;
+        }
+
+        function parseTimeZoneOffset(zone) {
+            const match = zone.match(/^UTC([+-]?\d{1,2}):?(\d{2})?$/);
+            if (match) {
+                const hours = parseInt(match[1]);
+                const minutes = match[2] ? parseInt(match[2]) : 0;
+                return hours * 60 + minutes;
+            }
+            return 0;
+        }
+
+        function resetFormtimeConv() {
+            document.getElementById("source-time").value = "";
+            document.getElementById("source-zone").value = "";
+            document.getElementById("target-zone").value = "";
+            document.getElementById("result").innerText = "";
+        }
+		
+		
+			
+		
+		
+		// Function to Toggle Visibility of Button Container
+		function toggleButtons() {
+			var container = document.querySelector('.button-container');
+			if (container.style.display === 'none' || container.style.display === '') {
+				container.style.display = 'block'; // Show the buttons
+			} else {
+				container.style.display = 'none'; // Hide the buttons
+			}
+		}
+		
+		
+		
+		
+		
+		function hideButtons() {
+			document.querySelector('.button-container').style.display = 'none';
+		}
+    </script>
+</body>
+</html>

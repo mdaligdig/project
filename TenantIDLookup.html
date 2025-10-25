@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>M365 Tenant ID Lookup</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1674/1674969.png">
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#9aa4b2;
+      --accent:#4f46e5;
+      --glass: rgba(255,255,255,0.03);
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#071028 0%,#041025 100%);
+      color:#e6eef6;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    .wrap{
+      max-width:900px;
+      margin:36px auto;
+      padding:20px;
+      flex:1;
+      width:100%;
+      box-sizing:border-box;
+    }
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(2,6,23,0.6);
+    }
+    h1{margin:0 0 8px;font-size:20px}
+    p.lead{margin:0 0 14px;color:var(--muted)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input[type="text"]{
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:var(--glass);
+      color:inherit;
+      flex:1;
+      box-sizing:border-box;
+    }
+    button{
+      background:var(--accent);
+      border:none;
+      color:white;
+      padding:10px 14px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .meta{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .meta .item{
+      background:rgba(255,255,255,0.02);
+      padding:10px;
+      border-radius:8px;
+      min-width:0;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:13px;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+      hyphens:auto;
+      display:block;
+      max-width:100%;
+    }
+    pre{
+      white-space:pre-wrap;
+      word-break:break-word;
+      max-height:360px;
+      overflow:auto;
+      padding:10px;
+      background:rgba(0,0,0,0.25);
+      border-radius:8px;
+    }
+    footer.inner{
+      margin-top:14px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* ===== New outer footer ===== */
+    footer.site-footer {
+      background: var(--card);
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 12px;
+      margin-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      width: 100%;
+    }
+
+    footer.site-footer .footer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    @media (max-width:560px){
+      .row{flex-direction:column}
+    }
+
+    .back-button {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .back-button:hover {
+      background-color: #c62828;
+      transform: scale(1.05);
+    }
+    .back-button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <button id="backBtn" class="back-button">← Back</button>
+    <div class="card">
+      <h1>M365 Tenant ID Lookup</h1>
+      <p class="lead">Lookup Microsoft 365 / Entra tenant ID from a verified domain (client-side only).</p>
+
+      <div class="row">
+        <input id="domainInput" type="text" placeholder="Primary domain (e.g. contoso.com)" aria-label="primary domain"/>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <input id="domainInput2" type="text" placeholder="Optional: second domain for comparison" aria-label="second domain"/>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button id="tenantLookupBtn">Find Tenant ID</button>
+        <button id="tenantClearBtn" class="secondary">Clear</button>
+      </div>
+
+      <div id="tenantStatus" style="margin-top:12px;color:var(--muted)"></div>
+      <div id="tenantResults" style="margin-top:12px;display:none">
+        <div class="meta" id="tenantSummary"></div>
+        <h3 style="margin-top:12px">Raw JSON</h3>
+        <pre id="tenantRaw" class="mono"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site-wide footer (same width as card) -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+    © 2025 Nuelle - M365 Tenant ID Lookup • For internal use only
+    </div>
+  </footer>
+
+  <script>
+    const tenantLookupBtn = document.getElementById('tenantLookupBtn');
+    const tenantClearBtn = document.getElementById('tenantClearBtn');
+    const tenantStatus = document.getElementById('tenantStatus');
+    const tenantResults = document.getElementById('tenantResults');
+    const tenantSummary = document.getElementById('tenantSummary');
+    const tenantRaw = document.getElementById('tenantRaw');
+    const domainInput = document.getElementById('domainInput');
+    const domainInput2 = document.getElementById('domainInput2');
+
+    function tenantClearUI(){ 
+      tenantStatus.textContent=''; 
+      tenantResults.style.display='none'; 
+      tenantSummary.innerHTML=''; 
+      tenantRaw.textContent=''; 
+    }
+
+    tenantClearBtn.addEventListener('click', ()=>{
+      domainInput.value=''; 
+      domainInput2.value=''; 
+      tenantClearUI(); 
+      domainInput.focus(); 
+    });
+
+    tenantLookupBtn.addEventListener('click', doTenantLookup);
+
+    function extractTenantFromText(text){
+      const m = text.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+      return m ? m[0] : null;
+    }
+
+    async function fetchTenant(domain){
+      if(!domain) return null;
+      domain = domain.toLowerCase();
+      if(domain.includes('@')) domain = domain.split('@').pop();
+      try{
+        const controller=new AbortController();
+        const timeout=setTimeout(()=>controller.abort(),15000);
+        const res = await fetch(`https://login.microsoftonline.com/${encodeURIComponent(domain)}/v2.0/.well-known/openid-configuration`, { method:'GET', mode:'cors', signal: controller.signal });
+        clearTimeout(timeout);
+        if(!res.ok) return null;
+        const js = await res.json();
+        return extractTenantFromText(JSON.stringify(js)) || extractTenantFromText(js.issuer||'') || extractTenantFromText(js.token_endpoint||'');
+      }catch(err){
+        return null;
+      }
+    }
+
+    async function doTenantLookup(){
+      tenantClearUI();
+      const d1 = domainInput.value.trim();
+      const d2 = domainInput2.value.trim();
+      if(!d1){
+        tenantStatus.innerHTML = '<span class="error">Please enter the primary domain</span>';
+        return;
+      }
+
+      tenantStatus.textContent = 'Querying tenant ID(s)...';
+      const tid1 = await fetchTenant(d1);
+      let tid2 = null;
+      if(d2) tid2 = await fetchTenant(d2);
+
+      tenantResults.style.display='block';
+      tenantSummary.innerHTML='';
+      tenantRaw.textContent = `Primary domain: ${d1}\nTenant ID: ${tid1||'Not found'}\n` + (d2 ? `Second domain: ${d2}\nTenant ID: ${tid2||'Not found'}` : '');
+
+      function addTenantMeta(k,v){ 
+        const d = document.createElement('div'); 
+        d.className='item'; 
+        d.innerHTML = '<strong>'+k+'</strong><div style="margin-top:6px" class="mono">'+v+'</div>'; 
+        tenantSummary.appendChild(d); 
+      }
+
+      addTenantMeta('Primary domain', d1);
+      addTenantMeta('Tenant ID', tid1||'Not found');
+
+      if(d2){
+        addTenantMeta('Second domain', d2);
+        addTenantMeta('Tenant ID', tid2||'Not found');
+
+        const matchText = (tid1 && tid2 && tid1===tid2) ? 'Tenant ID matched' : 'Tenant ID NOT matched';
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'item';
+        resultDiv.innerHTML = `<strong>Comparison result</strong><div style="margin-top:6px" class="mono">${matchText}</div>`;
+
+        if(matchText === 'Tenant ID matched'){
+          resultDiv.querySelector('.mono').style.color = '#4ade80';
+        } else {
+          resultDiv.querySelector('.mono').style.color = '#f87171';
+        }
+
+        tenantSummary.appendChild(resultDiv);
+      }
+
+      tenantStatus.textContent = 'Done';
+    }
+	
+    document.getElementById("backBtn").addEventListener("click", function() {
+      if (document.referrer !== "") {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Departmental Contact Directory – Search & Copy</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/256/9194/9194905.png">
+  <style>
+    :root{
+      --bg:#0f172a;      /* slate-900 */
+      --card:#111827;    /* gray-900 */
+      --muted:#94a3b8;   /* slate-400 */
+      --text:#e5e7eb;    /* gray-200 */
+      --accent:#38bdf8;  /* sky-400 */
+      --accent-2:#22d3ee;/* cyan-400 */
+      --ring:#7dd3fc;    /* sky-300 */
+      --success:#22c55e; /* green-500 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg, #0b1220, #0f172a);
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      line-height:1.5;
+    }
+    header{
+      padding:28px 16px 8px;
+      text-align:center;
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:clamp(22px, 3.6vw, 30px);
+      letter-spacing:0.2px;
+      font-weight:800;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:16px;
+    }
+    .search-wrap{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background:linear-gradient(180deg, rgba(11,18,32,.95), rgba(15,23,42,.95));
+      padding:12px 0 16px;
+      backdrop-filter:saturate(160%) blur(6px);
+      border-bottom:1px solid rgba(125,211,252,.15);
+    }
+    .search{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      max-width:720px;
+      margin:0 auto;
+    }
+    .search input{
+      flex:1;
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid rgba(125,211,252,.25);
+      background:#0b1220;
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+      transition:border .15s ease, box-shadow .15s ease;
+    }
+    .search input:focus{
+      border-color:var(--ring);
+      box-shadow:0 0 0 4px rgba(56,189,248,.15);
+    }
+    .btn{
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+      border:none;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#0b1220;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .groups{margin-top:18px;}
+    .group{
+      margin:22px 0;
+    }
+    .group h2{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+      margin:8px 4px 12px;
+      color:#c7d2fe;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+      gap:12px;
+    }
+    .card{
+      background:linear-gradient(180deg,#0c1222,#0f1629 40%);
+      border:1px solid rgba(125,211,252,.18);
+      border-radius:16px;
+      padding:14px;
+      box-shadow:0 6px 18px rgba(0,0,0,.35);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .card:hover{
+      transform:translateY(-1px);
+      border-color:rgba(125,211,252,.35);
+      box-shadow:0 8px 22px rgba(0,0,0,.45);
+    }
+    .title{
+      font-weight:800;
+      font-size:16px;
+      margin-bottom:8px;
+      color:#e9d5ff;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:6px 0;
+      border-top:1px dashed rgba(148,163,184,.22);
+    }
+    .row:first-of-type{border-top:none}
+    .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-right:6px;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .value{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size:14px;
+      word-break:break-word;
+      flex:1 1 auto;
+    }
+    .copy{
+      flex:0 0 auto;
+      padding:6px 9px;
+      font-size:12px;
+      border:1px solid rgba(125,211,252,.35);
+      background:#0b1220;
+      color:var(--text);
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .copy:hover{border-color:var(--ring)}
+    .muted{color:var(--muted)}
+    .no-results{
+      display:none;
+      text-align:center;
+      color:var(--muted);
+      padding:30px 8px;
+      font-weight:600;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:20px;
+      transform:translateX(-50%) translateY(20px);
+      background:#081320;
+      color:#d1fae5;
+      border:1px solid rgba(34,197,94,.4);
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      box-shadow:0 8px 20px rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:50;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+    a{
+      color:#93c5fd;
+      text-decoration:none;
+    }
+    a:hover{text-decoration:underline}
+	
+	.back-button {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-button:hover {
+      background-color: #c62828;
+      transform: scale(1.05);
+    }
+
+    .back-button:active {
+      transform: scale(0.95);
+    }
+	
+	footer.site-footer {
+	  background: var(--card);
+	  color: var(--muted);
+	  font-size: 13px;
+	  text-align: center;
+	  padding: 12px;
+	  margin-top: 40px;
+	  border-top: 1px solid rgba(255,255,255,0.05);
+	  width: 100%;
+	}
+
+	footer.site-footer .footer-inner {
+	  max-width: 900px; /* matches .wrap and .card width */
+	  margin: 0 auto;
+	  text-align: center;
+	}
+
+	footer.site-footer a {
+	  color: var(--accent);
+	  text-decoration: none;
+	  font-weight: 500;
+	  transition: color 0.3s;
+	}
+
+	footer.site-footer a:hover {
+	  color: #7c83f8;
+	}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Departmental Contact Directory — Search & Copy</h1>
+    <p class="muted" style="margin:0">Type anything: department, country, agency, phone, or email. Click “Copy” to copy.</p>
+  </header>
+
+  <div class="container">
+
+    <div class="search-wrap">
+      <div class="search">
+	  <button id="backBtn" class="back-button">← Back</button>
+        <input id="q" type="text" placeholder="Search (e.g., ‘security’, ‘cancel’, ‘+44 333 336 5691’, ‘ionos.co.uk’, ‘Radius’, ‘DAGS’, ‘myepfs’)" autocomplete="off" />
+        <button id="clearBtn" class="btn" type="button" title="Clear search">Clear</button>
+      </div>
+    </div>
+
+    <div id="groups" class="groups">
+
+      <!-- US/Canada/WW -->
+      <section class="group" data-group="US/Canada/WW Support Teams">
+        <h2>USA/Canada/WW Support Teams</h2>
+        <div class="grid">
+
+          <article class="card contact-card">
+            <div class="title">WEB HOSTING</div>
+            <div class="row">
+              <span class="label">📞 US</span>
+              <span class="value">+1 484 254 5555</span>
+              <button class="copy" data-copy="+14842545555">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Worldwide</span>
+              <span class="value">+1 816 621 4797</span>
+              <button class="copy" data-copy="+18166214797">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">support@ionos.com</span>
+              <button class="copy" data-copy="support@ionos.com">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">billing@ionos.com</span>
+              <button class="copy" data-copy="billing@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">SMB / MYWEBSITE</div>
+            <div class="row">
+              <span class="label">📞 US</span>
+              <span class="value">+1 866 289 5039</span>
+              <button class="copy" data-copy="+18662895039">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Worldwide</span>
+              <span class="value">+1 816 621 4797</span>
+              <button class="copy" data-copy="+18166214797">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">mywebsite@ionos.com</span>
+              <button class="copy" data-copy="mywebsite@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">SERVER</div>
+            <div class="row">
+              <span class="label">📞 US</span>
+              <span class="value">+1 484 254 5555</span>
+              <button class="copy" data-copy="+14842545555">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Worldwide</span>
+              <span class="value">+1 816 621 4797</span>
+              <button class="copy" data-copy="+18166214797">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">server247@ionos.com</span>
+              <button class="copy" data-copy="server247@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">RETENTION / CANCELLATION</div>
+            <div class="row">
+              <span class="label">📞 US</span>
+              <span class="value">+1 866 258 5616</span>
+              <button class="copy" data-copy="+18662585616">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Worldwide</span>
+              <span class="value">+1 816 621 4797</span>
+              <button class="copy" data-copy="+18166214797">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">cancel@ionos.com</span>
+              <button class="copy" data-copy="cancel@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">EXECUTIVE SOLUTION TEAM (COMPLAINTS)</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">N/A</span>
+              <button class="copy" disabled title="No phone available">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">complaints@ionos.com</span>
+              <button class="copy" data-copy="complaints@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">SECURITY TEAM</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+1 877 206 4253</span>
+              <button class="copy" data-copy="+18772064253">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">security-team@ionos.com</span>
+              <button class="copy" data-copy="security-team@ionos.com">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">abuse-team@ionos.com</span>
+              <button class="copy" data-copy="abuse-team@ionos.com">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">WEBSITE DESIGN SERVICE TEAM</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+1 484 791 4133</span>
+              <button class="copy" data-copy="+14847914133">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">info@ionos-design-service.com</span>
+              <button class="copy" data-copy="info@ionos-design-service.com">Copy</button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- UK Support Teams -->
+      <section class="group" data-group="UK Support Teams">
+        <h2>UK Support Teams</h2>
+        <div class="grid">
+
+          <article class="card contact-card">
+            <div class="title">WEB HOSTING</div>
+            <div class="row">
+              <span class="label">📞 US</span>
+              <span class="value">+44 333 336 5691</span>
+              <button class="copy" data-copy="+443333365691">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">support@ionos.co.uk</span>
+              <button class="copy" data-copy="support@ionos.co.uk">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">billing@ionos.co.uk</span>
+              <button class="copy" data-copy="billing@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+
+          <article class="card contact-card">
+            <div class="title">SMB / MYWEBSITE</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 800 021 1693</span>
+              <button class="copy" data-copy="+448000211693">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">mywebsite@ionos.co.uk</span>
+              <button class="copy" data-copy="mywebsite@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">SERVER</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 333 336 5691</span>
+              <button class="copy" data-copy="+443333365691">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">server247@ionos.co.uk</span>
+              <button class="copy" data-copy="server247@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">RETENTION / CANCELLATION</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 333 336 5691</span>
+              <button class="copy" data-copy="+443333365691">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">cancel@ionos.co.uk</span>
+              <button class="copy" data-copy="cancel@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">EXECUTIVE SOLUTION TEAM (COMPLAINTS)</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">N/A</span>
+              <button class="copy" disabled title="No phone available">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">complaints@ionos.co.uk</span>
+              <button class="copy" data-copy="complaints@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">SECURITY TEAM</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 333 336 1248</span>
+              <button class="copy" data-copy="+443333361248">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">security-team@ionos.co.uk</span>
+              <button class="copy" data-copy="security-team@ionos.co.uk">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">abuse-team@ionos.co.uk</span>
+              <button class="copy" data-copy="abuse-team@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">WEBSITE DESIGN SERVICE TEAM</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 333 336 5491</span>
+              <button class="copy" data-copy="+443333365491">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">designservice@ionos.co.uk</span>
+              <button class="copy" data-copy="designservice@ionos.co.uk">Copy</button>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Collections Agency -->
+      <section class="group" data-group="Collections Agency">
+        <h2>Collections Agency</h2>
+        <div class="grid">
+
+          <article class="card contact-card">
+            <div class="title">Agency: TrueAccord – US Market</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+1 866 611 2731</span>
+              <button class="copy" data-copy="+18666112731">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">🕒 Office Hours (EST)</span>
+              <span class="value">Mon–Fri 9:00am–7:00pm</span>
+            </div>
+			<div class="row">
+			  <span class="label">🌐 Portal</span>
+			  <span class="value">
+				<a href="https://www.trueaccord.com/app/login" target="_blank" rel="noopener noreferrer">
+				  TrueAccord: Account Login
+				</a>
+			  </span>
+			</div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">Agency: DAGS – CA Market</div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+1 888 395 1147</span>
+              <button class="copy" data-copy="+18883951147">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">🕒 Hours (EST)</span>
+              <span class="value">Mon–Fri 7:00am–9:00pm; Sat 8:00am–4:30pm; Toronto: Sun 1:00pm–5:00pm</span>
+            </div>
+			<div class="row">
+			  <span class="label">🌐 Portal</span>
+			  <span class="value">
+				<a href="https://dagroupservices.com/make-a-payment/" target="_blank" rel="noopener noreferrer">
+				  DAGS Payment Portal
+				</a>
+			  </span>
+			</div>
+          </article>
+
+          <article class="card contact-card">
+            <div class="title">Agency: EP Financial Solutions – UK Market</div>
+			<div class="row">
+              <span class="label">Previously known as Arvato Finance Services (AFS)</span>
+            </div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 344 472 9371</span>
+              <button class="copy" data-copy="+443444729371">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 344 472 9372</span>
+              <button class="copy" data-copy="+443444729372">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📞 Phone</span>
+              <span class="value">+44 344 472 9373</span>
+              <button class="copy" data-copy="+443444729373">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📩 Email</span>
+              <span class="value">contactus@myepfs.com</span>
+              <button class="copy" data-copy="contactus@myepfs.com">Copy</button>
+            </div>
+            <div class="row">
+              <span class="label">📄 Contact Form</span>
+              <span class="value"><a href="https://pay.myepfs.com/Contact" target="_blank" rel="noopener">pay.myepfs.com/Contact</a></span>
+            </div>
+			<div class="row">
+			  <span class="label">🌐 Portal</span>
+			  <span class="value">
+				<a href="https://pay.myepfs.com/" target="_blank" rel="noopener noreferrer">
+				  My EPFS Payment Portal
+				</a>
+			  </span>
+			</div>
+          </article>
+
+        </div>
+      </section>
+
+    </div>
+
+    <div id="noResults" class="no-results">No matches found. Try different keywords.</div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Copied!</div>
+  
+  <footer class="site-footer">
+    <div class="footer-inner">
+    © 2025 Nuelle - Departmental Contact Directory • For internal use only
+    </div>
+  </footer>
+
+  <script>
+    // Normalize text for robust searching (strip spaces, punctuation)
+    function normalize(str){
+      return (str || "")
+        .toString()
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g,'')   // remove diacritics
+        .replace(/[\W_]+/g,'');          // remove non-alphanumerics
+    }
+
+    const q = document.getElementById('q');
+    const clearBtn = document.getElementById('clearBtn');
+    const groups = Array.from(document.querySelectorAll('.group'));
+    const toast = document.getElementById('toast');
+    const noResultsEl = document.getElementById('noResults');
+
+    // Build a cache of normalized text for each card
+    const cards = Array.from(document.querySelectorAll('.contact-card')).map(card => {
+      const text = card.innerText;
+      card.dataset.search = normalize(text);
+      return card;
+    });
+
+    function applyFilter(){
+      const raw = q.value.trim();
+      const needle = normalize(raw);
+
+      let anyVisibleOverall = false;
+
+      groups.forEach(group => {
+        const localCards = Array.from(group.querySelectorAll('.contact-card'));
+        let visibleInGroup = 0;
+
+        localCards.forEach(card => {
+		// Match against card text OR group heading (data-group + h2 text)
+		const groupText = normalize(group.dataset.group + ' ' + group.querySelector('h2').innerText);
+		const matches = needle === '' || card.dataset.search.includes(needle) || groupText.includes(needle);
+
+		card.style.display = matches ? '' : 'none';
+		if (matches) visibleInGroup++;
+				});
+
+        // Hide group if no cards visible
+        group.style.display = visibleInGroup ? '' : 'none';
+        if (visibleInGroup) anyVisibleOverall = true;
+      });
+
+      noResultsEl.style.display = anyVisibleOverall ? 'none' : 'block';
+    }
+
+    q.addEventListener('input', applyFilter);
+    clearBtn.addEventListener('click', () => {
+      q.value = '';
+      applyFilter();
+      q.focus();
+    });
+
+    // Copy handler with graceful fallback
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.copy');
+      if (!btn || btn.disabled) return;
+
+      const text = btn.dataset.copy || '';
+      try{
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // Fallback for non-secure contexts (e.g., file://)
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        showToast('Copied: ' + text);
+      }catch(err){
+        showToast('Copy failed');
+        console.error(err);
+      }
+    });
+
+    let toastTimer = null;
+    function showToast(message){
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 1200);
+    }
+
+    // Initial render
+    applyFilter();
+	
+	document.getElementById("backBtn").addEventListener("click", function() {
+      if (document.referrer !== "") {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+    });
+  </script>
+</body>
+</html>

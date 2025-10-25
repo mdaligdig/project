@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Domain Tool: WHOIS & DNS</title>
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1674/1674969.png">
+  <style>
+    :root{
+      --bg:#0f1724;
+      --card:#0b1220;
+      --muted:#9aa4b2;
+      --accent:#4f46e5;
+      --glass: rgba(255,255,255,0.03);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#071028 0%,#041025 100%);color:#e6eef6}
+    .wrap{max-width:900px;margin:36px auto;padding:20px}
+    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(2,6,23,0.6)}
+    h1{margin:0 0 8px;font-size:20px}
+    p.lead{margin:0 0 14px;color:var(--muted)}
+    .tabs{display:flex;gap:4px;margin-bottom:12px}
+    .tab{flex:1;padding:10px 12px;text-align:center;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03)}
+    .tab.active{background:var(--accent)}
+    .tab-content{display:none;margin-top:12px}
+    .tab-content.active{display:block}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input[type="text"], select{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;appearance:none}
+    #domainInput { width: 100%; max-width: 100%; flex:1; }
+    select option{background-color: var(--card);color: #e6eef6}
+    button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:8px;cursor:pointer}
+    button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .meta{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    .meta .item{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+
+    .meta .item { min-width: 0; }
+    .mono{
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+      font-size:13px;
+      color:#cfe3ff;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
+      display: block;
+      max-width: 100%;
+    }
+    .meta .item { overflow-wrap: anywhere; word-break: break-word; }
+
+    pre{white-space:pre-wrap;word-break:break-word;max-height:360px;overflow:auto;padding:10px;background:rgba(0,0,0,0.25);border-radius:8px}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+    .error{color:#ffb4b4}
+    @media (max-width:560px){.row{flex-direction:column}}
+
+    .selector-controls{display:none;margin-top:8px;gap:8px}
+    .selector-controls.visible{display:flex}
+    .error { color: #ff6b6b; }
+
+    /* RAW JSON visibility: hidden by default; show when .show class is present */
+    .rawBlock { margin-top: 12px; }
+    .rawBlock .rawControls { margin-bottom: 8px; display:flex; gap:8px; align-items:center; }
+    .rawBlock pre { display:none; }
+    .rawBlock.show pre { display:block; }
+    /* clickable plain text (looks like a link) */
+    .rawToggleText {
+      color: var(--muted);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1;
+      user-select: none;
+    }
+    .rawToggleText.active { color: #ffffff; text-decoration: none; font-weight: 600; }
+	
+	.back-button {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      font-size: 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-button:hover {
+      background-color: #c62828;
+      transform: scale(1.05);
+    }
+
+    .back-button:active {
+      transform: scale(0.95);
+    }		
+	footer.site-footer {
+	  background: var(--card);
+	  color: var(--muted);
+	  font-size: 13px;
+	  text-align: center;
+	  padding: 12px;
+	  margin-top: 40px;
+	  border-top: 1px solid rgba(255,255,255,0.05);
+	  width: 100%;
+	}
+
+	footer.site-footer .footer-inner {
+	  max-width: 900px; /* matches .wrap and .card width */
+	  margin: 0 auto;
+	  text-align: center;
+	}
+
+	footer.site-footer a {
+	  color: var(--accent);
+	  text-decoration: none;
+	  font-weight: 500;
+	  transition: color 0.3s;
+	}
+
+	footer.site-footer a:hover {
+	  color: #7c83f8;
+	}
+
+	html, body {
+	  height: 100%;
+	  margin: 0;
+	  display: flex;
+	  flex-direction: column;
+	}
+
+	.wrap {
+	  flex: 1; /* this makes the main content take up the remaining space */
+	}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+  <button id="backBtn" class="back-button">← Back</button>
+    <div class="card">
+      <h1>Mini Domain Tool</h1>
+      <div class="tabs">
+        <div class="tab active" data-tab="whoisTab">WHOIS / RDAP</div>
+        <div class="tab" data-tab="dnsTab">DNS Lookup (DoH)</div>
+      </div>
+
+      <div class="row">
+        <input id="domainInput" type="text" placeholder="example.com or 8.8.8.8" aria-label="domain or IP"/>
+      </div>
+
+      <!-- WHOIS Tab -->
+      <div id="whoisTab" class="tab-content active">
+        <p class="lead">See public WHOIS/RDAP registration info for domains or IPs.</p>
+        <div class="row">
+          <button id="whoisLookupBtn">Lookup WHOIS</button>
+          <button id="whoisClearBtn" class="secondary">Clear</button>
+        </div>
+        <div id="whoisStatus" style="margin-top:12px;color:var(--muted)"></div>
+        <div id="whoisResults" style="margin-top:12px;display:none">
+          <div class="meta" id="whoisSummary"></div>
+          <h3 style="margin-top:12px">Parsed details</h3>
+          <div id="whoisParsed" class="meta"></div>
+
+          <!-- Raw JSON block hidden by default -->
+          <div class="rawBlock" id="whoisRawBlock">
+            <div class="rawControls">
+              <span id="whoisToggleRawBtn" class="rawToggleText">Show Raw JSON</span>
+            </div>
+            <h3 style="margin-top:0">Raw JSON</h3>
+            <pre id="whoisRaw" class="mono"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- DNS Tab -->
+      <div id="dnsTab" class="tab-content">
+        <p class="lead">Pick a record type and query DNS (DoH).</p>
+        <div class="row" style="align-items:center">
+          <select id="dnsType">
+            <option value="ALL">All Records</option>
+            <option value="A">A</option>
+            <option value="AAAA">AAAA</option>
+            <option value="CNAME">CNAME</option>
+            <option value="MX">MX</option>
+            <option value="TXT">TXT</option>
+            <option value="NS">NS</option>
+            <option value="SOA">SOA</option>
+            <option value="PTR">PTR</option>
+            <option value="SRV">SRV</option>
+            <option value="DMARC">DMARC (TXT)</option>
+            <option value="DKIM">DKIM (selector)</option>
+          </select>
+          <button id="dnsLookupBtn">Lookup DNS</button>
+          <button id="dnsClearBtn" class="secondary">Clear</button>
+        </div>
+
+        <!-- DKIM selector controls (hidden unless DKIM selected) -->
+        <div id="selectorControls" class="selector-controls">
+          <input id="dkimSelectorInput" type="text" placeholder="DKIM selector (manual) e.g. s1-ionos" style="min-width:180px" />
+          <select id="dkimSelectorPicker" title="Pick a common selector">
+            <option value="">— pick selector —</option>
+            <option value="s1-ionos">s1-ionos</option>
+            <option value="s2-ionos">s2-ionos</option>
+          </select>
+          <button id="clearSelectorBtn" class="secondary">Clear selector</button>
+        </div>
+
+        <div id="dnsStatus" style="margin-top:12px;color:var(--muted)"></div>
+        <div id="dnsResults" style="margin-top:12px;display:none">
+          <div class="meta" id="dnsSummary"></div>
+          <h3 style="margin-top:12px">Parsed records</h3>
+          <div id="dnsParsed" class="meta"></div>
+
+          <!-- Raw JSON block hidden by default -->
+          <div class="rawBlock" id="dnsRawBlock">
+            <div class="rawControls">
+              <span id="dnsToggleRawBtn" class="rawToggleText">Show Raw JSON</span>
+            </div>
+            <h3 style="margin-top:0">Raw JSON</h3>
+            <pre id="dnsRaw" class="mono"></pre>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Note: WHOIS/RDAP and DNS results depend on public providers. Some records may be limited or restricted.
+      </footer>
+    </div>
+  </div>
+  
+    <footer class="site-footer">
+    <div class="footer-inner">
+    © 2025 Nuelle - Mini Domain Tool • For internal use only
+    </div>
+  </footer>
+
+  <script>
+    const domainInput = document.getElementById('domainInput');
+
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    function shouldAutoLookup(targetTab){
+      const val = domainInput.value.trim();
+      if(!val) return false;
+      if(targetTab === 'whoisTab') {
+        return isValidDomain(val) || isValidIP(val);
+      } else {
+        return isValidDomain(val);
+      }
+    }
+
+    tabs.forEach(tab=>{
+      tab.addEventListener('click', async ()=>{
+        tabs.forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.dataset.tab;
+        tabContents.forEach(c=>c.classList.remove('active'));
+        document.getElementById(target).classList.add('active');
+
+        if(shouldAutoLookup(target)){
+          if(target === 'whoisTab'){
+            await doWhoisLookup();
+          } else if(target === 'dnsTab'){
+            await doDnsLookup();
+          }
+        }
+      });
+    });
+
+    function isValidDomain(d){
+      if(!d) return false;
+      d=d.trim().toLowerCase();
+      return /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i.test(d);
+    }
+
+    function isValidIP(input){
+      return /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/.test(input);
+    }
+
+    const DNS_TYPE_MAP = {
+      1: 'A',
+      2: 'NS',
+      5: 'CNAME',
+      6: 'SOA',
+      12: 'PTR',
+      15: 'MX',
+      16: 'TXT',
+      28: 'AAAA',
+      33: 'SRV',
+      255: 'ANY'
+    };
+
+    function dnsTypeName(val){
+      if(val === null || val === undefined) return '';
+      if(typeof val === 'number') return DNS_TYPE_MAP[val] || String(val);
+      if(typeof val === 'string'){
+        if(/^\d+$/.test(val)) return DNS_TYPE_MAP[Number(val)] || val;
+        return val.toUpperCase();
+      }
+      return String(val);
+    }
+
+    // ===== helper: format RDAP timestamps to "Mon.DD.YYYY" (UTC) =====
+    function formatRdapDate(iso) {
+      if (!iso) return '—';
+      try {
+        const d = new Date(iso);
+        if (!isNaN(d)) {
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          const mon = months[d.getUTCMonth()];
+          const day = String(d.getUTCDate()).padStart(2,'0'); // ensure two digits
+          const year = d.getUTCFullYear();
+          return `${mon}.${day}.${year}`; // e.g. "Feb.09.2026"
+        }
+        // fallback: extract YYYY-MM-DD substring if present
+        const m = String(iso).match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (m) {
+          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          const mon = months[Number(m[2]) - 1] || m[2];
+          return `${mon}.${m[3]}.${m[1]}`;
+        }
+      } catch (e) {
+        // noop
+      }
+      return String(iso);
+    }
+
+    // ===== WHOIS =====
+    const whoisLookupBtn = document.getElementById('whoisLookupBtn');
+    const whoisClearBtn = document.getElementById('whoisClearBtn');
+    const whoisStatus = document.getElementById('whoisStatus');
+    const whoisResults = document.getElementById('whoisResults');
+    const whoisSummary = document.getElementById('whoisSummary');
+    const whoisParsed = document.getElementById('whoisParsed');
+    const whoisRaw = document.getElementById('whoisRaw');
+    const whoisRawBlock = document.getElementById('whoisRawBlock');
+    const whoisToggleRawBtn = document.getElementById('whoisToggleRawBtn');
+
+    function whoisClearUI(){whoisStatus.textContent='';whoisResults.style.display='none';whoisSummary.innerHTML='';whoisParsed.innerHTML='';whoisRaw.textContent=''; whoisRawBlock.classList.remove('show'); whoisToggleRawBtn.classList.remove('active'); whoisToggleRawBtn.textContent = 'Show Raw JSON';}
+
+    whoisClearBtn.addEventListener('click', ()=>{ domainInput.value=''; whoisClearUI(); dnsClearUI(); domainInput.focus(); });
+    whoisLookupBtn.addEventListener('click', doWhoisLookup);
+
+    domainInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){
+        const activeTab = document.querySelector('.tab.active').dataset.tab;
+        if(activeTab==='whoisTab'){doWhoisLookup()} else {doDnsLookup()}
+      }
+    });
+
+    async function doWhoisLookup(){
+      whoisClearUI();
+      const input = domainInput.value.trim().toLowerCase();
+      if(!isValidDomain(input) && !isValidIP(input)){
+        whoisStatus.innerHTML='<span class="error">Please enter a valid domain or IP</span>';
+        return;
+      }
+
+      const type = isValidIP(input) ? 'ip' : 'domain';
+      whoisStatus.textContent = `Looking up ${input} (${type.toUpperCase()}) ...`;
+
+      try{
+        const controller=new AbortController();
+        const timeout=setTimeout(()=>controller.abort(),15000);
+        const res = await fetch(`https://rdap.org/${type}/${encodeURIComponent(input)}`, {signal: controller.signal});
+        clearTimeout(timeout);
+        if(!res.ok) throw new Error(res.status+' '+res.statusText);
+        const data = await res.json();
+        whoisStatus.textContent='Done — showing RDAP data';
+        whoisResults.style.display='block';
+        // populate raw (it remains hidden unless user toggles)
+        whoisRaw.textContent = JSON.stringify(data,null,2);
+        renderWhoisSummary(data);
+        renderWhoisParsed(data);
+      }catch(err){
+        whoisStatus.innerHTML='<span class="error">'+(err.message||err)+'</span>';
+      }
+    }
+
+    // Updated renderWhoisSummary to format Registered / Expires timestamps
+    function renderWhoisSummary(data){
+      whoisSummary.innerHTML='';
+      addWhoisMeta('Domain/IP', data.ldhName || data.handle || '—');
+      addWhoisMeta('Status', (data.status || []).join(', ') || '—');
+      const ns = (data.nameservers || []).map(n => n.ldhName || n.v4 || JSON.stringify(n)).join(', ');
+      addWhoisMeta('Nameservers', ns || '—');
+
+      // Extract events and format dates
+      const events = (data.events || []).reduce((acc, e) => { acc[e.eventAction] = e.eventDate; return acc; }, {});
+      const registeredRaw = events.registration || null;
+      const expiresRaw = events.expiration || null;
+
+      addWhoisMeta('Registered', registeredRaw ? formatRdapDate(registeredRaw) : '—');
+      addWhoisMeta('Expires', expiresRaw ? formatRdapDate(expiresRaw) : '—');
+    }
+
+    function addWhoisMeta(k,v){
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML='<strong>'+k+'</strong><div style="margin-top:6px" class="mono">'+(v||'—')+'</div>';
+      whoisSummary.appendChild(d);
+    }
+
+    function formatWhoisField(value){
+      if(!value) return 'REDACTED FOR PRIVACY';
+      const str = String(value).trim();
+      if(!str) return 'REDACTED FOR PRIVACY';
+      const lower = str.toLowerCase();
+      if(lower.includes('redacted') || lower.includes('privacy') || lower.includes('not disclosed') || lower.includes('data withheld')) {
+        return 'REDACTED FOR PRIVACY';
+      }
+      return str;
+    }
+
+    function renderWhoisParsed(data){
+      whoisParsed.innerHTML='';
+      const reg=(data.entities||[]).find(e=>(e.roles||[]).includes('registrar'))||{};
+      const registrant=(data.entities||[]).find(e=>(e.roles||[]).includes('registrant'))||{};
+
+      addParsedWhois('Registrar', extractName(reg) || data.port43 || '—');
+
+      const registrantName = extractName(registrant);
+      addParsedWhois('Registrant', formatWhoisField(registrantName));
+
+      const emails = extractEmails(data.entities||[]);
+      addParsedWhois('Emails', emails.length ? emails.join(', ') : 'REDACTED FOR PRIVACY');
+
+      addParsedWhois('RDAP Handle', data.handle || '—');
+    }
+
+    function addParsedWhois(k,v){
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML='<strong>'+k+'</strong><div style="margin-top:6px" class="mono">'+(v||'—')+'</div>';
+      whoisParsed.appendChild(d);
+    }
+
+    function extractName(entity){
+      if(!entity) return null;
+      if(entity.vcardArray&&Array.isArray(entity.vcardArray)){
+        try{
+          const v=entity.vcardArray[1];
+          const fn=v.find(item=>item[0]==='fn');
+          if(fn) return fn[3];
+        }catch(e){}
+      }
+      return entity.name||entity.handle||null;
+    }
+
+    function extractEmails(entities){
+      const out=new Set();
+      entities.forEach(ent=>{
+        if(ent.vcardArray&&Array.isArray(ent.vcardArray)){
+          try{
+            ent.vcardArray[1].forEach(item=>{
+              if(item[0]==='email'&&item[3]) out.add(item[3]);
+            });
+          }catch(e){}
+        }
+      });
+      return Array.from(out);
+    }
+
+    // WHOIS raw toggle behavior (plain text)
+    whoisToggleRawBtn.addEventListener('click', ()=>{
+      const isShown = whoisRawBlock.classList.toggle('show');
+      whoisToggleRawBtn.classList.toggle('active', isShown);
+      whoisToggleRawBtn.textContent = isShown ? 'Hide Raw JSON' : 'Show Raw JSON';
+    });
+
+    // ===== DNS =====
+    const dnsType=document.getElementById('dnsType');
+    const dnsLookupBtn=document.getElementById('dnsLookupBtn');
+    const dnsClearBtn=document.getElementById('dnsClearBtn');
+    const dnsStatus=document.getElementById('dnsStatus');
+    const dnsResults=document.getElementById('dnsResults');
+    const dnsSummary=document.getElementById('dnsSummary');
+    const dnsParsed=document.getElementById('dnsParsed');
+    const dnsRaw=document.getElementById('dnsRaw');
+    const dnsRawBlock = document.getElementById('dnsRawBlock');
+    const dnsToggleRawBtn = document.getElementById('dnsToggleRawBtn');
+
+    const selectorControls = document.getElementById('selectorControls');
+    const dkimSelectorInput = document.getElementById('dkimSelectorInput');
+    const dkimSelectorPicker = document.getElementById('dkimSelectorPicker');
+    const clearSelectorBtn = document.getElementById('clearSelectorBtn');
+
+    function dnsClearUI(){dnsStatus.textContent='';dnsResults.style.display='none';dnsSummary.innerHTML='';dnsParsed.innerHTML='';dnsRaw.textContent=''; dnsRawBlock.classList.remove('show'); dnsToggleRawBtn.classList.remove('active'); dnsToggleRawBtn.textContent = 'Show Raw JSON';}
+    dnsClearBtn.addEventListener('click', ()=>{ domainInput.value=''; whoisClearUI(); dnsClearUI(); domainInput.focus(); });
+    dnsLookupBtn.addEventListener('click', doDnsLookup);
+
+    // toggle selector UI depending on dns type
+    dnsType.addEventListener('change', () => {
+      const t = dnsType.value;
+      if(t === 'DKIM'){
+        selectorControls.classList.add('visible');
+      } else {
+        selectorControls.classList.remove('visible');
+      }
+      const activeTab = document.querySelector('.tab.active').dataset.tab;
+      if(activeTab === 'dnsTab') doDnsLookup();
+    });
+
+    // --- NEW: debounce + auto-run logic for selector input/picker ---
+    let selectorDebounceTimer = null;
+    const SELECTOR_DEBOUNCE_MS = 2000; // 2 seconds
+
+    async function maybeRunDkimAuto(){
+      const activeTab = document.querySelector('.tab.active').dataset.tab;
+      if(dnsType.value !== 'DKIM' || activeTab !== 'dnsTab') return;
+      const domain = domainInput.value.trim().toLowerCase();
+      const selector = (dkimSelectorInput.value || '').trim();
+      if(!isValidDomain(domain)) {
+        dnsStatus.innerHTML = '<span class="error">Please enter a valid domain to run DKIM lookup.</span>';
+        return;
+      }
+      if(!selector) {
+        return;
+      }
+      await runDkimCheck(domain, selector);
+    }
+
+    dkimSelectorPicker.addEventListener('change', async ()=>{
+      const val = dkimSelectorPicker.value || '';
+      if(val) dkimSelectorInput.value = val;
+      if(selectorDebounceTimer){ clearTimeout(selectorDebounceTimer); selectorDebounceTimer = null; }
+      await maybeRunDkimAuto();
+    });
+
+    dkimSelectorInput.addEventListener('input', ()=>{
+      if(selectorDebounceTimer) clearTimeout(selectorDebounceTimer);
+      selectorDebounceTimer = setTimeout(async ()=>{
+        selectorDebounceTimer = null;
+        await maybeRunDkimAuto();
+      }, SELECTOR_DEBOUNCE_MS);
+    });
+
+    dkimSelectorInput.addEventListener('keydown', async (e)=>{
+      if(e.key === 'Enter'){
+        if(selectorDebounceTimer){ clearTimeout(selectorDebounceTimer); selectorDebounceTimer = null; }
+        await maybeRunDkimAuto();
+      }
+    });
+
+    clearSelectorBtn.addEventListener('click', ()=>{ dkimSelectorInput.value=''; dkimSelectorPicker.value=''; dkimSelectorInput.focus(); });
+
+    // Helper: fetch a DNS type from DoH providers (tries Cloudflare then Google)
+    async function fetchDns(domain, type){
+      const endpoints=[
+        {url:`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`,hdr:{'Accept':'application/dns-json'}},
+        {url:`https://dns.google/resolve?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`,hdr:{}}
+      ];
+
+      let lastErr = null;
+      for(const ep of endpoints){
+        try{
+          const controller=new AbortController();
+          const timeout=setTimeout(()=>controller.abort(),12000);
+          const res=await fetch(ep.url,{method:'GET',headers:ep.hdr,signal:controller.signal});
+          clearTimeout(timeout);
+          if(!res.ok){ lastErr = new Error(`Provider returned ${res.status}`); continue; }
+          const data = await res.json();
+          if(data && (data.Answer || data.Answers || data.Rrset || data.Question || data.Answers === null)){
+            return data;
+          }
+        }catch(err){
+          lastErr = err;
+        }
+      }
+      return null;
+    }
+
+    async function doDnsLookup(){
+      dnsClearUI();
+      const domain=domainInput.value.trim().toLowerCase();
+      const qtype=dnsType.value||'A';
+      if(!isValidDomain(domain)){
+        dnsStatus.innerHTML='<span class="error">Please enter a valid domain</span>'; return;
+      }
+
+      if(qtype === 'DMARC'){
+        await runDmarcCheck(domain);
+        return;
+      }
+
+      if(qtype === 'DKIM'){
+        const selector = (dkimSelectorInput.value || '').trim();
+        if(!selector){
+          dnsStatus.innerHTML = '<span class="error">Please provide a DKIM selector (type or pick one).</span>';
+          return;
+        }
+        await runDkimCheck(domain, selector);
+        return;
+      }
+
+      if(qtype === 'ALL'){
+        dnsStatus.textContent = `Resolving all common records for ${domain} ...`;
+        const types = ["A","AAAA","CNAME","MX","TXT","NS","SOA","PTR","SRV"];
+        const allResults = [];
+        for(const t of types){
+          const data = await fetchDns(domain, t);
+          allResults.push({ type: t, data });
+        }
+
+        dnsStatus.textContent = 'Done — showing all DNS data';
+        dnsResults.style.display = 'block';
+        dnsRaw.textContent = JSON.stringify(allResults,null,2);
+
+        dnsSummary.innerHTML = '';
+        addDnsMeta('Domain', domain);
+        addDnsMeta('Query type', 'ALL');
+        addDnsMeta('Record types checked', types.join(', '));
+
+        dnsParsed.innerHTML = '';
+        allResults.forEach(item=>{
+          const t = item.type;
+          const data = item.data;
+          const answers = data ? (data.Answer || data.Answers || data.Rrset || []) : [];
+          if(answers && answers.length){
+            answers.forEach(a=>{
+              const typeLabel = dnsTypeName(a.type || t);
+              const ttl = a.TTL || a.ttl || '';
+              const rdata = a.data || a.rdata || (typeof a.rdata !== 'undefined' ? JSON.stringify(a.rdata) : '');
+              const display = ttl ? `${rdata} (TTL: ${ttl})` : rdata;
+              addDnsParsed(typeLabel, display);
+            });
+          } else {
+            addDnsParsed(t, 'No records returned.');
+          }
+        });
+
+        return;
+      }
+
+      dnsStatus.textContent=`Resolving ${domain} (${qtype}) ...`;
+
+      const result = await fetchDns(domain, qtype);
+      if(!result){
+        dnsStatus.innerHTML='<span class="error">Lookup failed or no data returned.</span>';
+        return;
+      }
+
+      dnsStatus.textContent='Done — showing DNS data';
+      dnsResults.style.display='block';
+      dnsRaw.textContent=JSON.stringify(result,null,2);
+      renderDnsSummary(domain,qtype,result);
+      renderDnsParsed(result);
+    }
+
+    function renderDnsSummary(domain,qtype,data){
+      dnsSummary.innerHTML='';
+      addDnsMeta('Domain', domain);
+      addDnsMeta('Query type', qtype);
+      const answers = data.Answer || data.Answers || data.Rrset || [];
+      addDnsMeta('Records found', (answers && answers.length) || 0);
+    }
+
+    function renderDnsParsed(data){
+      dnsParsed.innerHTML='';
+      const answers = data.Answer || data.Answers || data.Rrset || [];
+      if(answers && answers.length){
+        answers.forEach(a=>{
+          const type = dnsTypeName(a.type) || 'Record';
+          const ttl = a.TTL || a.ttl || '';
+          const rdata = a.data || a.rdata || (typeof a.rdata !== 'undefined' ? JSON.stringify(a.rdata) : '');
+          const display = ttl ? `${rdata} (TTL: ${ttl})` : rdata;
+          addDnsParsed(type, display);
+        });
+      } else {
+        addDnsParsed('Records', 'No records returned.');
+      }
+    }
+
+    function guessTypeFromRdata(rdata){
+      if(!rdata) return '';
+      if(rdata.includes('v=') || rdata.includes('spf')) return 'TXT';
+      if(rdata.includes('@') || rdata.includes('mail')) return 'MX';
+      if(rdata.includes('ns') || rdata.endsWith('.')) return 'NS';
+      return '';
+    }
+
+    function addDnsMeta(title,value){
+      const div=document.createElement('div');
+      div.className='item';
+      div.innerHTML='<strong>'+title+'</strong><div style="margin-top:6px" class="mono">'+(value||'—')+'</div>';
+      dnsSummary.appendChild(div);
+    }
+
+    function addDnsParsed(k,v){
+      const d=document.createElement('div');
+      d.className='item';
+      const label = dnsTypeName(k) || k;
+      d.innerHTML='<strong>'+label+'</strong><div style="margin-top:6px" class="mono">'+(v||'—')+'</div>';
+      dnsParsed.appendChild(d);
+    }
+
+    // DNS raw toggle behavior (plain text)
+    dnsToggleRawBtn.addEventListener('click', ()=>{
+      const isShown = dnsRawBlock.classList.toggle('show');
+      dnsToggleRawBtn.classList.toggle('active', isShown);
+      dnsToggleRawBtn.textContent = isShown ? 'Hide Raw JSON' : 'Show Raw JSON';
+    });
+
+    // ===== DMARC & DKIM helpers =====
+    async function runDmarcCheck(domain){
+      dnsClearUI();
+      dnsStatus.textContent = `Checking DMARC for ${domain} ...`;
+      dnsResults.style.display = 'block';
+      dnsSummary.innerHTML = '';
+      addDnsMeta('Domain', domain);
+      addDnsMeta('Operation', 'DMARC');
+
+      try{
+        const dmarcName = `_dmarc.${domain}`;
+        const dmarcResp = await fetchDns(dmarcName, 'TXT');
+        let dmarcAnswers = dmarcResp ? (dmarcResp.Answer || dmarcResp.Answers || dmarcResp.Rrset || []) : [];
+        if(!dmarcAnswers || dmarcAnswers.length === 0){
+          addDnsParsed('DMARC', 'No DMARC record found at '+dmarcName);
+        } else {
+          const txts = dmarcAnswers.map(a => a.data || a.rdata || (a.rdata ? JSON.stringify(a.rdata) : '')).join(' ');
+          const parsed = parseDmarcTxt(txts);
+          addDnsParsed('DMARC TXT', txts);
+          addDnsParsed('DMARC policy', `p=${parsed.p || 'not found'}; pct=${parsed.pct || 'not set'}; rua=${parsed.rua || 'none'}`);
+        }
+        dnsStatus.textContent = 'Done — DMARC lookup completed';
+      }catch(err){
+        addDnsParsed('DMARC', 'Lookup error: '+(err.message||err));
+        dnsStatus.innerHTML = '<span class="error">DMARC lookup error</span>';
+      }
+    }
+
+    async function runDkimCheck(domain, selector){
+      dnsClearUI();
+      dnsStatus.textContent = `Checking DKIM for ${selector}._domainkey.${domain} ...`;
+      dnsResults.style.display = 'block';
+      dnsSummary.innerHTML = '';
+      addDnsMeta('Domain', domain);
+      addDnsMeta('Operation', `DKIM (${selector})`);
+
+      try{
+        const dkimName = `${selector}._domainkey.${domain}`;
+        const dkimResp = await fetchDns(dkimName, 'TXT');
+        const answers = dkimResp ? (dkimResp.Answer || dkimResp.Answers || dkimResp.Rrset || []) : [];
+        if(!answers || answers.length === 0){
+          addDnsParsed('DKIM', `No DKIM record found for ${dkimName}`);
+        } else {
+          const txts = answers.map(a => a.data || a.rdata || (a.rdata ? JSON.stringify(a.rdata) : '')).join(' ');
+          addDnsParsed('DKIM TXT', txts);
+          const pMatch = txts.match(/p=([A-Za-z0-9+\/=]+)/);
+          if(pMatch){
+            addDnsParsed('DKIM public key (p=)', pMatch[1].slice(0,80) + (pMatch[1].length>80 ? '…' : ''));
+            addDnsParsed('DKIM status', 'Public key found (p=) — DNS record looks valid.');
+          } else {
+            addDnsParsed('DKIM status', 'No direct p= value found. Record may be a CNAME/alias (e.g. s1.dkim.provider.com).');
+          }
+        }
+        dnsStatus.textContent = 'Done — DKIM lookup completed';
+      }catch(err){
+        addDnsParsed('DKIM', 'Lookup error: '+(err.message||err));
+        dnsStatus.innerHTML = '<span class="error">DKIM lookup error</span>';
+      }
+    }
+
+    function parseDmarcTxt(txt){
+      const out = {};
+      if(!txt) return out;
+      const cleaned = txt.replace(/(^"|"$)/g,'').replace(/\s+/g,' ');
+      cleaned.split(';').map(s=>s.trim()).forEach(pair=>{
+        if(!pair) return;
+        const [k,v] = pair.split('=').map(x=>x && x.trim());
+        if(k) out[k] = v || '';
+      });
+      return out;
+    }
+
+    // initialize selector controls visibility based on current dnsType value
+    (function init(){
+      if(dnsType.value === 'DKIM') selectorControls.classList.add('visible');
+      else selectorControls.classList.remove('visible');
+      // ensure raw blocks are hidden initially
+      whoisRawBlock.classList.remove('show');
+      dnsRawBlock.classList.remove('show');
+    })();
+
+	function addWhoisMeta(k,v){
+	  const d=document.createElement('div');
+	  d.className='item';
+	  const displayValue = (!v || v==='—') ? `<span class="error">${v||'—'}</span>` : v;
+	  d.innerHTML='<strong>'+k+'</strong><div style="margin-top:6px" class="mono">'+displayValue+'</div>';
+	  whoisSummary.appendChild(d);
+	}
+
+	function addParsedWhois(k,v){
+	  const d=document.createElement('div');
+	  d.className='item';
+	  const displayValue = (!v || v==='—' || v==='REDACTED FOR PRIVACY') ? `<span class="error">${v||'—'}</span>` : v;
+	  d.innerHTML='<strong>'+k+'</strong><div style="margin-top:6px" class="mono">'+displayValue+'</div>';
+	  whoisParsed.appendChild(d);
+	}
+
+	function addDnsParsed(k,v){
+	  const d=document.createElement('div');
+	  d.className='item';
+	  const label = dnsTypeName(k) || k;
+	  const displayValue = (!v || v==='—' || v==='No records returned.' || v==='REDACTED FOR PRIVACY') 
+							? `<span class="error">${v||'—'}</span>` 
+							: v;
+	  d.innerHTML='<strong>'+label+'</strong><div style="margin-top:6px" class="mono">'+displayValue+'</div>';
+	  dnsParsed.appendChild(d);
+	}
+	
+	document.getElementById("backBtn").addEventListener("click", function() {
+      if (document.referrer !== "") {
+        window.history.back();
+      } else {
+        window.location.href = "/";
+      }
+    });
+
+  </script>
+</body>
+</html>
